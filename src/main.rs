@@ -30,20 +30,26 @@ fn generate_workout(intensity: u32, random_number: u32){
     }
 }
 
-struct Cacher<T> where T: Fn(u32) -> u32,{
+struct Cacher<T, U, V> where T: Fn(U) -> V,{
     calculation: T,
-    value: HashMap<u32, Option<u32>>,
+    value: HashMap<U, Option<V>>,
 }
 
-impl<T> Cacher<T> where T: Fn(u32) -> u32{
-    fn new(calculation: T) -> Cacher<T>{
+impl<T, U, V> Cacher<T, U, V> 
+        where T: Fn(U) -> V,
+        U: std::cmp::Eq 
+            + std::hash::Hash
+            + Copy,
+        V: Copy
+{
+    fn new(calculation: T) -> Cacher<T, U, V>{
         Cacher{
             calculation,
             value: HashMap::new(),
         }
     }
 
-    fn value(&mut self, arg: u32) -> u32{
+    fn value(&mut self, arg: U) -> V{
         match self.value.get(&arg){
             Some(v) => v.unwrap(),
             None => {
@@ -66,5 +72,14 @@ mod tests{
         let v2 = c.value(2);
 
         assert_eq!(v2, 2);
+    }
+
+    #[test]
+    fn call_with_string_usize(){
+        let mut c = Cacher::new(|a: &str| a.len());
+
+        let v1 = c.value("Three");
+
+        assert_eq!(v1, 5);
     }
 }
