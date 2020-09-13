@@ -32,29 +32,29 @@ fn generate_workout(intensity: u32, random_number: u32){
 
 struct Cacher<T, U, V> where T: Fn(U) -> V,{
     calculation: T,
-    value: HashMap<U, Option<V>>,
+    values: HashMap<U, Option<V>>,
 }
 
-impl<T, U, V> Cacher<T, U, V> 
+impl<T, U, V> Cacher<T, U, V>   // Generic T is the function where U and V are the parameter and return value respectively for said function.
         where T: Fn(U) -> V,
-        U: std::cmp::Eq 
+        U: std::cmp::Eq         // U must have 3 trait bounds, Eq, Hash, and Copy.
             + std::hash::Hash
             + Copy,
-        V: Copy
+        V: Copy                 // V must have trait bound Copy.
 {
     fn new(calculation: T) -> Cacher<T, U, V>{
         Cacher{
             calculation,
-            value: HashMap::new(),
+            values: HashMap::new(),
         }
     }
 
     fn value(&mut self, arg: U) -> V{
-        match self.value.get(&arg){
-            Some(v) => v.unwrap(),
+        match self.values.get(&arg){ // Get the value for the key in the hashmap.
+            Some(v) => v.unwrap(),  // get the value in the option stored in the hashmap.
             None => {
                 let v =(self.calculation)(arg);
-                self.value.insert(arg, Some(v));
+                self.values.insert(arg, Some(v));    // Put the key/value pair into the hashmap.
                 v
             }
         }
